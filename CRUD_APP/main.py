@@ -21,6 +21,23 @@ class MyWidget(QMainWindow):
         self.modified = {}
         self.titles = None
 
+    def update_result(self):
+        cur = self.con.cursor()
+        query = "SELECT * FROM films ORDER BY id"
+        result = cur.execute(query).fetchall()
+        self.tableWidget.setRowCount(len(result))
+        self.tableWidget.setColumnCount(len(result[0]))
+        self.tableWidget.setHorizontalHeaderLabels(
+            ['ID', 'Название фильма', 'Год выпуска', 'Жанр', 'Продолжительность'])
+        self.titles = [description[0] for description in cur.description]
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
+        self.modified = {}
+
+    def item_changed(self, item):
+        self.modified[self.titles[item.column()]] = item.text()
+
 
 
 class AddFilmWidget(QMainWindow):
