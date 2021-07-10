@@ -38,6 +38,33 @@ class MyWidget(QMainWindow):
     def item_changed(self, item):
         self.modified[self.titles[item.column()]] = item.text()
 
+    def add_film(self):
+        dialog = AddFilmWidget(self)
+        dialog.show()
+
+    def edit_film(self):
+        rows = list(set([i.row() for i in self.tableWidget.selectedItems()]))
+        ids = [self.tableWidget.item(i, 0).text() for i in rows]
+        if not ids:
+            self.statusBar().showMessage('Ничего не выбрано')
+            return
+        else:
+            self.statusBar().showMessage('')
+        dialog = AddFilmWidget(self, film_id=ids[0])
+        dialog.show()
+
+    def delete_elem(self):
+        rows = list(set([i.row() for i in self.tableWidget.selectedItems()]))
+        ids = [self.tableWidget.item(i, 0).text() for i in rows]
+        valid = QMessageBox.question(
+            self, '', "Действительно удалить элементы с id " + ",".join(ids),
+            QMessageBox.Yes, QMessageBox.No)
+        if valid == QMessageBox.Yes:
+            cur = self.con.cursor()
+            cur.execute("DELETE FROM films WHERE id IN (" + ", ".join(
+                '?' * len(ids)) + ")", ids)
+            self.con.commit()
+            self.update_result()
 
 
 class AddFilmWidget(QMainWindow):
