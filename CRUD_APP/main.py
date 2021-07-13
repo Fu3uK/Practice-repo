@@ -81,6 +81,21 @@ class AddFilmWidget(QMainWindow):
             self.setWindowTitle('Редактирование записи')
             self.get_elem()
 
+    def get_elem(self):
+        cur = self.con.cursor()
+        item = cur.execute(
+            f"SELECT f.id, f.title, f.year, g.title, f.duration FROM films as f JOIN genres as g ON g.id = f.genre WHERE f.id = {self.film_id}").fetchone()
+        self.title.setPlainText(item[1])
+        self.year.setPlainText(str(item[2]))
+        self.comboBox.setCurrentText(item[3])
+        self.duration.setPlainText(str(item[4]))
+
+    def selectGenres(self):
+        req = "SELECT * from genres"
+        cur = self.con.cursor()
+        for value, key in cur.execute(req).fetchall():
+            self.params[key] = value
+        self.comboBox.addItems(list(self.params.keys()))
 
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
