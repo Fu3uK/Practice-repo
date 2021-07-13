@@ -97,6 +97,35 @@ class AddFilmWidget(QMainWindow):
             self.params[key] = value
         self.comboBox.addItems(list(self.params.keys()))
 
+    def add_elem(self):
+        cur = self.con.cursor()
+        try:
+            id_off = cur.execute("SELECT max(id) FROM films").fetchone()[0]
+            new_data = (id_off + 1, self.title.toPlainText(), int(self.year.toPlainText()),
+                        self.params.get(self.comboBox.currentText()), int(self.duration.toPlainText()))
+            cur.execute("INSERT INTO films VALUES (?,?,?,?,?)", new_data)
+        except ValueError as ve:
+            self.statusBar().showMessage("Неверно заполнена форма")
+            print(ve)
+        else:
+            self.con.commit()
+            self.parent().update_result()
+            self.close()
+
+    def edit_elem(self):
+        cur = self.con.cursor()
+        try:
+            new_data = (self.title.toPlainText(), int(self.year.toPlainText()),
+                        self.params.get(self.comboBox.currentText()), int(self.duration.toPlainText()), self.film_id)
+            cur.execute("UPDATE films SET title=?, year=?, genre=?, duration=? WHERE id=?", new_data)
+        except ValueError as ve:
+            self.statusBar().showMessage("Неверно заполнена форма")
+            print(ve)
+        else:
+            self.con.commit()
+            self.parent().update_result()
+            self.close()
+
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
 
